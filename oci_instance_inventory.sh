@@ -5,7 +5,7 @@ SNO=1
 
 TENANCY_ID=$(grep '^tenancy=' /root/.oci/config | cut -d'=' -f2)
 
-echo "S.No,DisplayName,RegionName,CompartmentName,State,InstanceOCID,OSName,OSVersion" > "$OUTPUT"
+echo "S.No,DisplayName,RegionName,CompartmentName,State,InstanceOCID,OSName,OSVersion,ImageName" > "$OUTPUT"
 
 REGIONS=$(oci iam region-subscription list \
   --query 'data[]."region-name"' \
@@ -59,7 +59,9 @@ do
 
             OS_VERSION=$(echo "$IMAGE_INFO" | jq -r '.data."operating-system-version" // "Unknown"')
 
-            printf '%s,%s,%s,%s,%s,%s,%s,%s\n' \
+            IMAGE_NAME=$(echo "$IMAGE_INFO" | jq -r '.data."display-name" // "Unknown"')
+
+            printf '%s,%s,%s,%s,%s,%s,%s,%s,%s\n' \
               "$SNO" \
               "$DISPLAY_NAME" \
               "$REGION" \
@@ -67,7 +69,8 @@ do
               "$STATE" \
               "$INSTANCE_OCID" \
               "$OS_NAME" \
-              "$OS_VERSION" >> "$OUTPUT"
+              "$OS_VERSION" \
+              "$IMAGE_NAME" >> "$OUTPUT"
 
             SNO=$((SNO + 1))
         done
@@ -85,3 +88,5 @@ echo
 echo "Inventory completed."
 echo "Total instances: $TOTAL_INSTANCES"
 echo "Output file: $OUTPUT"
+
+
